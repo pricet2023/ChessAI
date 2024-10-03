@@ -13,21 +13,21 @@ export default function Referee() {
     const modalRef = useRef<HTMLDivElement>(null);
     const checkmateModalRef = useRef<HTMLDivElement>(null);
 
-    function playMove(playedPiece: Piece, destination: Position): boolean {
+    function playMove(playedPiece: Piece, destination: Position): [boolean, string] {
         // If the playing piece doesn't have any moves return
-        if (playedPiece.possibleMoves === undefined) return false;
+        if (playedPiece.possibleMoves === undefined) return [false, ''];
 
         // Prevent the inactive team from playing
         if (playedPiece.team === TeamType.OUR
-            && board.totalTurns % 2 !== 1) return false;
+            && board.totalTurns % 2 !== 1) return [false, ''];
         if (playedPiece.team === TeamType.OPPONENT
-            && board.totalTurns % 2 !== 0) return false;
+            && board.totalTurns % 2 !== 0) return [false, ''];
 
         let playedMoveIsValid = false;
 
         const validMove = playedPiece.possibleMoves?.some(m => m.samePosition(destination));
 
-        if (!validMove) return false;
+        if (!validMove) return [false, ''];
 
         const enPassantMove = isEnPassantMove(
             playedPiece.position,
@@ -37,7 +37,8 @@ export default function Referee() {
         );
 
         // playMove modifies the board thus we
-        // need to call setBoard
+        // need to call setBoard, retreive new FEN here as well
+        let newFEN: string = '';
         setBoard(() => {
             const clonedBoard = board.clone();
             clonedBoard.totalTurns += 1;
@@ -49,6 +50,8 @@ export default function Referee() {
             if(clonedBoard.winningTeam !== undefined) {
                 checkmateModalRef.current?.classList.remove("hidden");
             }
+
+            newFEN = clonedBoard.getFEN();
 
             return clonedBoard;
         })
@@ -65,7 +68,7 @@ export default function Referee() {
             });
         }
 
-        return playedMoveIsValid;
+        return [playedMoveIsValid, newFEN];
     }
 
     function isEnPassantMove(

@@ -9,8 +9,31 @@ import {
 import { Piece, Position } from "./models";
 
 interface Props {
-  playMove: (piece: Piece, position: Position) => boolean;
+  playMove: (piece: Piece, position: Position) => [boolean, string];
   pieces: Piece[];
+}
+
+const getBestMove = async (FEN: string) => {
+  try {
+    const response = await fetch('http://top-deb12-devs:5000/best_move', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ FEN }),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      return data.best_move
+    } else {
+      console.error(data.error);
+    }
+  } catch (error) {
+    console.error('Error fetching best move:', error);
+  }
+
+  return '';
 }
 
 export default function Chessboard({playMove, pieces} : Props) {
@@ -77,6 +100,10 @@ export default function Chessboard({playMove, pieces} : Props) {
     }
   }
 
+  function playGeneratedMove(move: string) {
+      
+  }
+
   function dropPiece(e: React.MouseEvent) {
     const chessboard = chessboardRef.current;
     if (activePiece && chessboard) {
@@ -90,13 +117,16 @@ export default function Chessboard({playMove, pieces} : Props) {
       );
 
       if (currentPiece) {
-        var success = playMove(currentPiece.clone(), new Position(x, y));
+        const [success, FEN] = playMove(currentPiece.clone(), new Position(x, y));
 
         if(!success) {
           //RESETS THE PIECE POSITION
           activePiece.style.position = "relative";
           activePiece.style.removeProperty("top");
           activePiece.style.removeProperty("left");
+        } else {
+          // get opponent move from server
+          console.log("Current FEN: ", FEN);
         }
       }
       setActivePiece(null);
