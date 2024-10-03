@@ -15,7 +15,7 @@ interface Props {
 
 const getBestMove = async (FEN: string) => {
   try {
-    const response = await fetch('http://top-deb12-devs:5000/best_move', {
+    const response = await fetch('http://top-deb12-dev:5000/best_move', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -36,7 +36,7 @@ const getBestMove = async (FEN: string) => {
   return '';
 }
 
-export default function Chessboard({playMove, pieces} : Props) {
+export default function Chessboard({ playMove, pieces }: Props) {
   const [activePiece, setActivePiece] = useState<HTMLElement | null>(null);
   const [grabPosition, setGrabPosition] = useState<Position>(new Position(-1, -1));
   const chessboardRef = useRef<HTMLDivElement>(null);
@@ -101,7 +101,7 @@ export default function Chessboard({playMove, pieces} : Props) {
   }
 
   function playGeneratedMove(move: string) {
-      
+
   }
 
   function dropPiece(e: React.MouseEvent) {
@@ -119,7 +119,7 @@ export default function Chessboard({playMove, pieces} : Props) {
       if (currentPiece) {
         const [success, FEN] = playMove(currentPiece.clone(), new Position(x, y));
 
-        if(!success) {
+        if (!success) {
           //RESETS THE PIECE POSITION
           activePiece.style.position = "relative";
           activePiece.style.removeProperty("top");
@@ -127,6 +127,7 @@ export default function Chessboard({playMove, pieces} : Props) {
         } else {
           // get opponent move from server
           console.log("Current FEN: ", FEN);
+          getBestMove(FEN).then(bestMove => console.log("BEST MOVE: ", bestMove));
         }
       }
       setActivePiece(null);
@@ -144,8 +145,8 @@ export default function Chessboard({playMove, pieces} : Props) {
       let image = piece ? piece.image : undefined;
 
       let currentPiece = activePiece != null ? pieces.find(p => p.samePosition(grabPosition)) : undefined;
-      let highlight = currentPiece?.possibleMoves ? 
-      currentPiece.possibleMoves.some(p => p.samePosition(new Position(i, j))) : false;
+      let highlight = currentPiece?.possibleMoves ?
+        currentPiece.possibleMoves.some(p => p.samePosition(new Position(i, j))) : false;
 
       board.push(<Tile key={`${j},${i}`} image={image} number={number} highlight={highlight} />);
     }
