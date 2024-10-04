@@ -19,6 +19,7 @@ def best_move():
     
     stockfish.set_fen_position(fen)
     best_move = stockfish.get_best_move()
+    print(best_move)
 
     return jsonify({"best_move": best_move})
 

@@ -294,8 +294,9 @@ export class Board {
 
             return fen_row;
         })
-
-        const fenrowstr = fen_rows.join('/');
+    
+        //at this point the fen rows are reversed wrt the normal convention
+        const fenrowstr = fen_rows.reverse().join('/');
 
         //castling rights
         let castlingrights: string = '';
